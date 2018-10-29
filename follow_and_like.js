@@ -3,10 +3,11 @@
 
 
 /**FOLLOW******************************************/
-//mémory leak si s'arrete ? 
-// le temps est mauvais car plein de sleep partout
-
-//probleme : les etapes peuvent se produire dans le désordre.
+//bug: memory leak car grossi exponentiellement 
+//bug: le temps est mauvais car plein de sleep partout
+//bug: les etapes peuvent se produire dans le désordre.
+//bug : pas de like si zero coeur ?
+/* TODO LIST*/
 /*
 check si image existe
 	oui -> check si follow deja
@@ -18,18 +19,15 @@ check si image existe
 			oui -> relancer le script
 			non -> the end
 */
+//ajax: check follow fail ? juste recup lib lien s'abonner. si toujours s'abonner c'est que probleme, alors meme solution que pour ajax
+//ajax : pas follow si plus de X follower
+//ajax: liker x photos de chaques profiles ajouté
 //check si déja like : si déja like et pas abonné, c'est que unfollow, donc pas la peine
 //si fail, ajouter nom compte dans com
-//si x follow fail :  pause de 5 minutes, 15 minutes, 30, 1h, 2h, 5h, 10h ... sinon, juste recup lib lien s'abonner. si toujours s'abonner c'est que probleme, alors meme solution que pour ajax
-//bug : pas de like si zero coeur ?
 //si image n'existe pas, la fonction pour en trouver une autre est pas parfaite, elle ne fonctionne pas si pas présent sur l'ecran parfois.
 	//lister les images une par unes, check url qui pose pb et aller à celle d'apres. en esperant que ce n'est pas la derniere de la page...
-
 //ajouter date départ et quand fini, relancer script avec time = date départ+24h-heure actuel
-//mail si plantage
-//
-//pas follow si plus de X follower
-//liker x photos de chaques profiles ajouté
+//mail si plantage?
 
 var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
 var maxActions = 9999;//999

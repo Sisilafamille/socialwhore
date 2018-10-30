@@ -35,11 +35,12 @@ var maxActions = 9999;//999
 var maxLikesOnAPost = 90;
 var maxViewsOnAPost = 90;
 var defaultMaxFailFolow = 3;
-var maxFailFolow = defaultMaxFailFolow;
+var keepLogs = false;
 
 var MinTimeTryAgain = 600000;
 var MaxTimeTryAgain = 18000000;//5h
 var nextTryAgain = MinTimeTryAgain; //milli seconds until the script is lauch again after it was not possible to follow
+var maxFailFolow = defaultMaxFailFolow;
 
 var countActions = 0;
 var dateLastAction = new Date();
@@ -105,6 +106,10 @@ function followAndLike(){
 	var returnFollow = 0;
 	var returnLike = 0;
 	
+	if(keepLogs === false){
+		window.clear = clear;
+		clear();
+	}
 	if(checkContinuScript()){
 		returnFollow = clicFollow();
 		
@@ -130,6 +135,7 @@ function followAndLike(){
 			if(speedNextAction <= 0){						
 				speedNextAction = 500;
 				log('Temps d attente plus long que entre deux actions : '+((new Date() - dateLastAction))/1000)+'s > '+(speedAction/1000)+'s';
+				
 			}else{
 				log('Next Action in '+ Math.round(speedNextAction/1000)+'s');
 			}

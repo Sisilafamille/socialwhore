@@ -44,7 +44,7 @@ var maxLikesOnAPost = 40;
 var maxViewsOnAPost = 40;
 var defaultMaxFailFolow = 3;
 var keepLogs = true;
-var minSpeedNextAction = 10000;
+var minSpeedNextAction = 10000; //5 et < : bloque au bout de x next
 
 var MinTimeTryAgain = 600000;
 var MaxTimeTryAgain = 18000000;//5h

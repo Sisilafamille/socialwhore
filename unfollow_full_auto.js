@@ -54,7 +54,7 @@ function unfollow(){
 				
 				//https://www.instagram.com/web/friendships/albertastreetart/unfollow/
 				
-				$(this).find(".oF4XW").click();
+				$(this).find("._8A5w5").click();
 				sleep(1000).then(() => {
 					confirmUnfollow();		
 					scrollDown();

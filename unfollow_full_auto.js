@@ -10,7 +10,7 @@
 //todo: vérif au début si la liste est completmenet chargé, supprimer param fuckscroll?
 //todo: sauver tout en ajax et recup au début du script, puis maj des xxx premiers
 
-var speedAction = 58000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug mais pas complte niveau tests
+var speedAction = 56000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow
 var maxUnfollow = 99999;//max - 1000 par jours ? 1000 ? 2000 ?
 var unfollowSafe = false;// true : ne va pas unfollow si le nombre de followrs trouvé dans la liste n'est pas le meme que celui qui est indiqué dans le profile
 var fuckScroll = true;//dont do scroll at the begining, if the list is allready full

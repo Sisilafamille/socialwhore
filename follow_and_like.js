@@ -19,6 +19,14 @@ check si image existe
 			oui -> relancer le script
 			non -> the end
 */
+//si click sur derniere image, check ajax avant ? :
+/**
+22H01 07s: url /p/BpjSlStABX0/?tagged=portrait déja demandé, sleep debugger eval code:65:2
+22H01 08s: La page n'est pas chargeable en ajax debugger eval code:65:2
+22H01 13s: tentative de clic sur derniere image debugger eval code:65:2
+22H01 20s: Next Action in 29s debugger eval code:65:2
+22H01 20s: good !!
+*/
 //ajax: check follow fail ? juste recup lib lien s'abonner. si toujours s'abonner c'est que probleme, alors meme solution que pour ajax
 //ajax : pas follow si plus de X follower
 //ajax: liker x photos de chaques profiles ajouté
@@ -32,10 +40,11 @@ check si image existe
 var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
 var maxActions = 9999;//999
 
-var maxLikesOnAPost = 90;
-var maxViewsOnAPost = 90;
+var maxLikesOnAPost = 40;
+var maxViewsOnAPost = 40;
 var defaultMaxFailFolow = 3;
-var keepLogs = false;
+var keepLogs = true;
+var minSpeedNextAction = 10000;
 
 var MinTimeTryAgain = 600000;
 var MaxTimeTryAgain = 18000000;//5h
@@ -102,7 +111,7 @@ function checkContinuScript(){
 }
 
 function followAndLike(){
-	var speedNextAction = 200;
+	var speedNextAction = minSpeedNextAction;
 	var returnFollow = 0;
 	var returnLike = 0;
 	
@@ -164,7 +173,7 @@ function followAndLike(){
 						maxFailFolow = defaultMaxFailFolow;
 					}
 					//sleep(4000).then(() => {
-						next(speedNextAction);	
+						old_next(speedNextAction);	
 					//});					
 				});					
 			});
@@ -172,7 +181,7 @@ function followAndLike(){
 		}else if(returnFollow == 'nothing'){
 			//log('nothing');
 			//sleep(2000).then(() => {
-				next(speedNextAction);	
+				old_next(speedNextAction);	
 			//});
 			return false;
 		}	
@@ -279,7 +288,7 @@ function old_next(speedNextAction = speedAction){
 	});
 }
 
-function next(speedNextAction){
+function next_ajax(speedNextAction){
 	//log('in next');
 	$( ".coreSpriteRightPaginationArrow" ).each(function( index ) {
 		
@@ -288,13 +297,13 @@ function next(speedNextAction){
 			countFailLoadNextPage ++;
 			sleep(1000).then(() => {
 				log('url '+$( this ).attr('href')+' déja demandé, sleep');				
-				next(speedNextAction);				
+				next_ajax(speedNextAction);				
 			});
 			return false;
 		}else{
 			
 			lastPageUrlCheck = nextPageUrl;		
-		
+
 			//var nextPageUrl = 'https://www.instagram.com/p/BnYPdAylmzR/?tagged=portraitphotography';	
 			var request;
 			request = new XMLHttpRequest();
@@ -332,7 +341,7 @@ function next(speedNextAction){
 								$( ".eLAPa" ).last().click();
 								sleep(2000).then(() => {				
 									followAndLike();				
-									log('good !!');
+									log('ouvrir la derniere image de la liste : good !!');
 								});					
 							}else{		
 								log('aucune action possible, fin du programme');	

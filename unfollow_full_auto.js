@@ -5,7 +5,7 @@
 //bug :memory leak si fin du scrit ??
 //optimisation: document.body.removeChild(document.getElementById('button')); retirer elements pour gagner de la ram ??
 //bug: differentiel, attend pas que le bouton change de statut pour relancer le script, résultat plein de fufollow en double si lent
-//todo : unfollow en ajax pour pouvoir connaitre statut ( 200 = ok normalment) : , si x 403 consécutif, pause de 5 minutes, 15 minutes, 30, 1h, 2h, 5h, 10h ...
+//todo : unfollow en ajax pour pouvoir connaitre statut ( 200 = ok normalment) : , si x 403 consécutif, pause de 5 minutes, 15 minutes, 30, 1h, 2h, 5h, 10h ... //https://www.instagram.com/web/friendships/albertastreetart/unfollow/
 //todo: sav last id click, si toujours s'abonner, incrémente conteur de forbiden et ajouter à list à laisser tranquil, faire suivant. si suivant encore forbiden et si param max consécutiv error attein, stop et notif
 //todo: vérif au début si la liste est completmenet chargé, supprimer param fuckscroll?
 //todo: sauver tout en ajax et recup au début du script, puis maj des xxx premiers
@@ -21,7 +21,7 @@ var secondBeforeNextScroll = 2000;
 var qtyMissingUsersTolerated = 20;//lors de la récupération de la liste des personnes qui suivent, quantité manquante toléré pour commencer les unfollow en masse
 //var qtyMaxFollowedToKeep = 2000; pour ne pas se manger le ban de trop de followed de charger, limiter la liste à 2000 personnes à garder
 
-var aFollowerToKeep = ['shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
+var aFollowerToKeep = ['anya_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
 var aFollowerToKeepFound = [];
 var countUnfollow = 0;
 var countElement = 0;
@@ -48,13 +48,10 @@ function unfollow(){
 				}
 			}else{
 				countUnfollow++;
-				//log('not found, à unfollow :'+username+' -'+countUnfollow);
-				log('Unfollow N°'+countUnfollow+' : '+username+'');
-				
-				
-				//https://www.instagram.com/web/friendships/albertastreetart/unfollow/
+				log('Unfollow N°'+countUnfollow+' : '+username+'');		
 				
 				$(this).find("._8A5w5").click();
+				
 				sleep(1000).then(() => {
 					confirmUnfollow();		
 					scrollDown();

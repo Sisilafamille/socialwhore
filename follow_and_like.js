@@ -307,7 +307,6 @@ function getNameUserFromPicture(){
 	return nameUser;
 }
 
-
 function nextPicture(speedNextAction = speedAction){
 	
 	//log('in next');
@@ -320,76 +319,6 @@ function nextPicture(speedNextAction = speedAction){
 			
 			return false;
 	    }
-	});
-}
-
-function nextPictureAjax(speedNextAction){
-	//log('in next');
-	$( ".coreSpriteRightPaginationArrow" ).each(function( index ) {
-		
-		var nextPageUrl = 'https://www.instagram.com/'+$( this ).attr('href');
-		if(nextPageUrl == lastPageUrlCheck && countFailLoadNextPage <= 5){
-			countFailLoadNextPage ++;
-			sleep(1000).then(() => {
-				log('url '+$( this ).attr('href')+' déja demandé, sleep');				
-				nextPictureAjax(speedNextAction);				
-			});
-			return false;
-		}else{
-			
-			lastPageUrlCheck = nextPageUrl;		
-
-			//var nextPageUrl = 'https://www.instagram.com/p/BnYPdAylmzR/?tagged=portraitphotography';	
-			var request;
-			request = new XMLHttpRequest();
-			request.open('GET', nextPageUrl, false);
-			request.send(); // there will be a 'pause' here until the response to come.
-
-			if (countFailLoadNextPage <= 5 && request.status != 404) {
-				countFailLoadNextPage = 0;
-				if( $( this ).text() == 'Suivant'){
-					this.click();
-					sleep(speedNextAction).then(() => {				
-						followAndLike();				
-					});
-					return false;
-				}else{
-					log('pas de page suivante');
-					return false;
-				}
-			}else{
-				if(countFailLoadNextPage > 5){
-					log('La page n\'est pas chargeable en ajax');
-					countFailLoadNextPage = 0;
-				}else{				
-					log("The page you are trying to reach is not available.");
-				}
-				if($( ".ckWGn" ).length){
-					$( ".ckWGn" ).first().click();
-					sleep(1000).then(() => {
-						window.scrollTo(0,document.body.scrollHeight);
-						
-						sleep(3000).then(() => {
-							//ouvrir la derniere image de la liste
-							if($( ".eLAPa" ).length){
-								log('tentative de clic sur derniere image');				
-								$( ".eLAPa" ).last().click();
-								sleep(2000).then(() => {				
-									followAndLike();				
-									log('ouvrir la derniere image de la liste : good !!');
-								});					
-							}else{		
-								log('aucune action possible, fin du programme');	
-								notif("Page introuvable");
-							}
-						});		
-					});		
-				}else{		
-					log("pas de bouton pour fermer l'image");	
-				}
-			}
-		}
-		return false;
 	});
 }
 

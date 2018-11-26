@@ -3,9 +3,11 @@
 
 
 /**FOLLOW******************************************/
+//bug: ouverture de la derniere page qui ne fonctionne pas correctement, ne charge pas d'image suivante
+//au lancement, aller à XX (( 50) pages plus bas
 //si pas de chargemnt du cadre suivant : plantage : fermer calque et aller à la fin et click
 //bug: memory leak car grossi exponentiellement 
-//bug : pas de like si zero coeur ?
+//bug: pas de like si zero coeur ?
 /* TODO LIST*/
 /*
 check si image existe
@@ -46,8 +48,8 @@ check si image existe
 var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
 var maxActions = 9999;//999
 
-var maxLikesOnAPost = 40;
-var maxViewsOnAPost = 40;
+var maxLikesOnAPost = 30;
+var maxViewsOnAPost = 30;
 var defaultMaxFailFolow = 3;
 var keepLogs = true;
 var minSpeedNextAction = 15000; //5 et < : bloque au bout de x next
@@ -132,9 +134,8 @@ function followAndLike(){
 			log('bug, pas sur la bonne page ou page plus dispo');
 			
 			if(!openPost()){
-				log('impossible de cliquer sur une image');
-				
-				notif("bug");
+				log('impossible de cliquer sur une image');				
+				notif("bug, impossible de cliquer sur une image");
 			}else{
 				log('click on picture ok :)');
 				sleep(1000).then(() => {				
@@ -316,6 +317,8 @@ function nextPicture(speedNextAction = speedAction){
 			sleep(speedNextAction).then(() => {				
 				followAndLike();				
 			});
+			
+			return false;
 	    }
 	});
 }
@@ -410,9 +413,10 @@ function like(){
 
 function getQuantityLikes(){
 	var qtyLikes = 0;
-	$( ".HbPOm span" ).each(function( index , test) {
-		qtyLikes = $( this ).text();
-		qtyLikes = qtyLikes.replace(' ','');//si plus de 1000, supprimer espaces		
+	$( ".sqdOP span" ).each(function( index , test) {
+		//qtyLikes = $( this ).text();
+		qtyLikes = this.lastChild.textContent;;
+		qtyLikes = qtyLikes.replace(' ','');//si plus de 1000, supprimer espaces
 	});	
 	return qtyLikes;
 }
@@ -420,7 +424,8 @@ function getQuantityLikes(){
 function getQuantityview(){
 	var qtyLikes = 0;
 	$( ".vcOH2 span" ).each(function( index , test) {
-		qtyLikes = $( this ).text();
+		//qtyLikes = $( this ).text();
+		qtyLikes = this.lastChild.textContent;
 		qtyLikes = qtyLikes.replace(' ','');//si plus de 1000, supprimer espaces		
 	});	
 	return qtyLikes;

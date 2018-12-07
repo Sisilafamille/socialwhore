@@ -3,6 +3,8 @@
 
 
 /**FOLLOW******************************************/
+//modifier mode de fonctionement : passer de photos en photo en mode mignature, check nombre coeur ou ajax nb follower.
+	//si pas bon : next, sinon click + follow. si fin de page, scroll, puis attente, puis reprise là ou on en était, avec ajout ID dans photo si pas capable de continuer
 //bug: ouverture de la derniere page qui ne fonctionne pas correctement, ne charge pas d'image suivante
 //au lancement, aller à XX (( 50) pages plus bas
 //si pas de chargemnt du cadre suivant : plantage : fermer calque et aller à la fin et click

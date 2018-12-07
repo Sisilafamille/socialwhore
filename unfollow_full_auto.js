@@ -10,8 +10,10 @@
 //todo: vérif au début si la liste est completmenet chargé, supprimer param fuckscroll?
 //todo: sauver tout en ajax et recup au début du script, puis maj des xxx premiers
 
-var speedAction = 56000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow
+var speedAction = 54000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 56000 pas de probleme
 var maxUnfollow = 99999;//max - 1000 par jours ? 1000 ? 2000 ?
+
+var keepFollowers = false;// true : conserver les gens qui nous suivent
 var unfollowSafe = false;// true : ne va pas unfollow si le nombre de followrs trouvé dans la liste n'est pas le meme que celui qui est indiqué dans le profile
 var fuckScroll = true;//dont do scroll at the begining, if the list is allready full
 
@@ -21,7 +23,7 @@ var secondBeforeNextScroll = 2000;
 var qtyMissingUsersTolerated = 20;//lors de la récupération de la liste des personnes qui suivent, quantité manquante toléré pour commencer les unfollow en masse
 //var qtyMaxFollowedToKeep = 2000; pour ne pas se manger le ban de trop de followed de charger, limiter la liste à 2000 personnes à garder
 
-var aFollowerToKeep = ['ericparephoto','anya_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
+var aFollowerToKeep = ['tatianaspiridonova','ericparephoto','anya_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
 var aFollowerToKeepFound = [];
 var countUnfollow = 0;
 var countElement = 0;
@@ -200,60 +202,69 @@ function main(){
 
 		var qtyFollowed = getQuantityUsers(2);
 		log('il y a '+qtyFollowed+' followeds');
-		openListUser(2);
 		
-		if(qtyFollowed != 0){
-			var qtyFollowedFound = getQtyFollowedFound();
+		if(keepFollowers){		
+			openListUser(2);
 			
-			if(!fuckScroll){
-				var sleepTimer = scrollToBottom(qtyFollowed - qtyFollowedFound);
-			}else{
-				var sleepTimer = 1000;				
-			}					
-			sleep(sleepTimer + 2000).then(() => {
-								
-				if(qtyFollowedFound == qtyFollowed){
-					log('tous les followeds ont été trouvés');
+			if(qtyFollowed != 0){
+				var qtyFollowedFound = getQtyFollowedFound();
+				
+				if(!fuckScroll){
+					var sleepTimer = scrollToBottom(qtyFollowed - qtyFollowedFound);
 				}else{
-					log('bug! il manque '+(qtyFollowed - qtyFollowedFound)+' followeds dans la liste');
-				}
-				//console.log( aFollowerToKeep ); 
-				if(((qtyFollowedFound + qtyMissingUsersTolerated) >= qtyFollowed) || !unfollowSafe){
-					if(closeDiv()){
-						sleep(1000).then(() => {
-							//qtyFollowed = getQuantityUsers(3);
-							openListUser(3);
-							sleep(1000).then(() => {
-								scrollDown();
-								//sleepTimer = scrollToBottom(qtyFollowed,maxNbScrollToBottom);
-								sleepTimer = 0;
-								sleep(sleepTimer + 3000).then(() => {
-									let now = new Date();							
-									log('Unfollowing '+maxUnfollow+' users now: '+now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() );
+					var sleepTimer = 1000;				
+				}					
+				sleep(sleepTimer + 2000).then(() => {
 									
-									unfollow();
-								});	
-							});	
-						});	
-					}	
-				}else{
-					notif("Unfollow not possible : "+qtyFollowedFound+'/'+qtyFollowed);
-					log("Unfollow not possible: "+qtyFollowedFound+'/'+qtyFollowed+' : restart !' );
-					if(lastQtyFollowedFound != qtyFollowedFound){
-						lastQtyFollowedFound = qtyFollowedFound;
-						log('restart !' );
-						main();
+					if(qtyFollowedFound == qtyFollowed){
+						log('tous les followeds ont été trouvés');
 					}else{
-						log('le scroll ne fonctionne pas, fin du game');
+						log('bug! il manque '+(qtyFollowed - qtyFollowedFound)+' followeds dans la liste');
 					}
-				}
-			});
+					//console.log( aFollowerToKeep ); 
+					if(((qtyFollowedFound + qtyMissingUsersTolerated) >= qtyFollowed) || !unfollowSafe){
+						if(closeDiv()){
+							sleep(1000).then(() => {
+								//qtyFollowed = getQuantityUsers(3);
+								startUnfollow();							
+							});	
+						}	
+					}else{
+						notif("Unfollow not possible : "+qtyFollowedFound+'/'+qtyFollowed);
+						log("Unfollow not possible: "+qtyFollowedFound+'/'+qtyFollowed+' : restart !' );
+						if(lastQtyFollowedFound != qtyFollowedFound){
+							lastQtyFollowedFound = qtyFollowedFound;
+							log('restart !' );
+							main();
+						}else{
+							log('le scroll ne fonctionne pas, fin du game');
+						}
+					}
+				});
+			}else{
+				log('aucun followed trouvé');
+			}	
 		}else{
-			log('aucun followed trouvé');
-		}	
+			startUnfollow();
+		}
 	}else{
 		log(' bug, pas la bonne page ? il faut aller sur la page de profile.');
 	}
+}
+
+function startUnfollow(){
+	openListUser(3);
+	sleep(1000).then(() => {
+		scrollDown();
+		//sleepTimer = scrollToBottom(qtyFollowed,maxNbScrollToBottom);
+		sleepTimer = 0;
+		sleep(sleepTimer + 3000).then(() => {
+			let now = new Date();							
+			log('Unfollowing '+maxUnfollow+' users now: '+now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() );
+			
+			unfollow();
+		});	
+	});	
 }
 
 main();

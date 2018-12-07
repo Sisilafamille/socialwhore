@@ -4,7 +4,7 @@
 
 /**FOLLOW******************************************/
 
-var speedAction = 6000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
+var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
 var maxActions = 9999;//999
 
 var maxLikesOnAPost = 30;
@@ -86,7 +86,7 @@ function main(){
 		clear();
 	}
 	if(checkContinuScript()){
-		returnLike = like()
+		returnLike = like();
 		
 		if( returnLike == -1){
 			log('bug, pas sur la bonne page ou page plus dispo');
@@ -117,7 +117,7 @@ function main(){
 			dateLastAction = new Date();
 					
 			//check if follow succes
-			sleep(2000).then(() => {
+			sleep(4000).then(() => {
 				returnLike = like(false)				
 				if(returnLike != 0){
 					countFailFollow++;
@@ -198,6 +198,7 @@ function openPost(){
 	}
 	return false;
 }
+
 function getNameUserFromPicture(){
 	var nameUser = '';
 	$( ".FPmhX" ).each(function( index2 ) {

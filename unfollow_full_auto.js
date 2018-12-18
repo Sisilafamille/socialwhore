@@ -10,7 +10,7 @@
 //todo: vérif au début si la liste est completmenet chargé, supprimer param fuckscroll?
 //todo: sauver tout en ajax et recup au début du script, puis maj des xxx premiers
 
-var speedAction = 54000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 56000 pas de probleme
+var speedAction = 52000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 54k,56k pas de probleme
 var maxUnfollow = 99999;//max - 1000 par jours ? 1000 ? 2000 ?
 
 var keepFollowers = false;// true : conserver les gens qui nous suivent
@@ -23,7 +23,7 @@ var secondBeforeNextScroll = 2000;
 var qtyMissingUsersTolerated = 20;//lors de la récupération de la liste des personnes qui suivent, quantité manquante toléré pour commencer les unfollow en masse
 //var qtyMaxFollowedToKeep = 2000; pour ne pas se manger le ban de trop de followed de charger, limiter la liste à 2000 personnes à garder
 
-var aFollowerToKeep = ['tatianaspiridonova','ericparephoto','anya_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
+var aFollowerToKeep = ['edson.mastreani','tatianaspiridonova','ericparephoto','anya_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
 var aFollowerToKeepFound = [];
 var countUnfollow = 0;
 var countElement = 0;
@@ -75,7 +75,11 @@ function scrollDown(){
 }
 
 function getSumScrollHeight(){
-	sumScrollHeight += 600;
+	if(sumScrollHeight == 0){
+		sumScrollHeight = 300;
+	}else{
+		sumScrollHeight += 600;
+	}
 	return sumScrollHeight;
 }
 

@@ -27,8 +27,8 @@
 var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
 var maxActions = 9999;//999
 
-var maxLikesOnAPost = 50;
-var maxViewsOnAPost = 50;
+var maxLikesOnAPost = 10000;
+var maxViewsOnAPost = 10000;
 var defaultMaxFailFolow = 3;
 var keepLogs = true;
 var minSpeedNextAction = 15000; //5 et < : bloque au bout de x next
@@ -288,8 +288,10 @@ function clicFollow(){
 					var n = str.search("abonner");
 					if(n != -1){
 						if(like(true) === 1 ){
-							this.click();					
-							followed = 'yes';
+							if(getIsFollowingUsAjax() == 'nope'){
+								this.click();					
+								followed = 'yes';
+							}
 						}else{
 							log('allready liked, maybe folling us: '+getNameUserFromPicture());
 						}
@@ -313,12 +315,54 @@ function clicFollow(){
 	return followed;	
 }
 
-function getNameUserFromPicture(){
+function getNameUserFromPictureOld(){
 	var nameUser = '';
 	$( ".FPmhX" ).each(function( index2 ) {
 		nameUser = $( this ).text();
 	});
 	return nameUser;
+}
+
+function getNameUserFromPicture(){
+	var nameUser = '';
+	var oUserName = $( ".FPmhX" );
+	if(oUserName.length){
+		nameUser = oUserName.first().text();
+	
+	}
+	return nameUser;	
+}
+
+function getIsFollowingUsAjax(){
+	var isFollowingUs = 'nope';
+	var nameUser = getNameUserFromPicture();
+	var nextPageUrl = 'https://www.instagram.com/'+nameUser+'/?__a=1';
+	var request;
+	request = new XMLHttpRequest();
+	request.open('GET', nextPageUrl, false);
+	request.send(); // there will be a 'pause' here until the response to come.
+
+	if (request.status === 404) {
+		console.log("The page you are trying to reach is not available.");	
+		isFollowingUs = 'error';
+	}else{
+		
+		//console.log(request);
+		//console.log(request.response);
+		var obj = JSON.parse(request.response); 
+				
+		if(obj.graphql.user.follows_viewer){
+			isFollowingUs = 'yes';
+			console.log('Allready following us: '+nameUser);
+		}else{
+			console.log('not following us: '+nameUser);
+		}
+		//console.log(request.responseText);
+		//var newDoc = document.open("text/html", "replace");
+		//newDoc.write(request.responseText);
+		//newDoc.close();
+	}
+	return isFollowingUs;
 }
 
 function nextPicture(speedNextAction = speedAction){
@@ -329,8 +373,7 @@ function nextPicture(speedNextAction = speedAction){
 			this.click();
 			sleep(speedNextAction).then(() => {				
 				followAndLike();				
-			});
-			
+			});			
 			return false;
 	    }
 	});

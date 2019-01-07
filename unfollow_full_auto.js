@@ -67,7 +67,7 @@ function unfollow(){
 			}			
         }
     });
-	//notif('no more unfollow');
+	notif('no more unfollow ?');
 }
 
 function scrollDown(){
@@ -75,8 +75,8 @@ function scrollDown(){
 }
 
 function getSumScrollHeight(){
-	if(sumScrollHeight == 0){
-		sumScrollHeight = 300;
+	if(sumScrollHeight < 1000){
+		sumScrollHeight += 200;
 	}else{
 		sumScrollHeight += 600;
 	}

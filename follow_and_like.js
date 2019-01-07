@@ -4,6 +4,8 @@
 /** FOLLOW & LIKE DUM ******************************************/
 /** navige d'images en images et like + follow si en dessous d'une limite de like/vues **/
 
+//ne pas follow si follow deja !!!!!
+
 //modifier mode de fonctionement : passer de photos en photo en mode mignature, check nombre coeur ou ajax nb follower.
 	//si pas bon : next, sinon click + follow. si fin de page, scroll, puis attente, puis reprise là ou on en était, avec ajout ID dans photo si pas capable de continuer
 
@@ -14,9 +16,6 @@
 //todo: ajax: check follow fail ? juste recup lib lien s'abonner. si toujours s'abonner c'est que probleme, alors meme solution que pour ajax
 //todo: ajax : pas follow si plus de X follower
 //todo: ajax: liker x photos de chaques profiles ajouté
-//todo: check si déja like : si déja like et pas abonné, c'est que unfollow, donc pas la peine
-//todo: au lancement, aller à XX (( 50) pages plus bas
-
 
 //si image n'existe pas, la fonction pour en trouver une autre est pas parfaite, elle ne fonctionne pas si pas présent sur l'ecran parfois.
 	//lister les images une par unes, check url qui pose pb et aller à celle d'apres. en esperant que ce n'est pas la derniere de la page...
@@ -288,8 +287,12 @@ function clicFollow(){
 					var str = $( this ).text();
 					var n = str.search("abonner");
 					if(n != -1){
-						this.click();					
-						followed = 'yes';
+						if(like(true) === 1 ){
+							this.click();					
+							followed = 'yes';
+						}else{
+							log('allready liked, maybe folling us: '+getNameUserFromPicture());
+						}
 					}else{
 						log('Déja abonné: '+getNameUserFromPicture());
 					}
@@ -333,22 +336,22 @@ function nextPicture(speedNextAction = speedAction){
 	});
 }
 
-function like(){
+function like(check = false){
 	var liked = 0;
 	var heartGrey = $( ".glyphsSpriteHeart__outline__24__grey_9" );
-	if(heartGrey.length){
+	if($( ".glyphsSpriteHeart__filled__24__red_5" ).length){		
+		//log('allready liked');			
+	}else if(heartGrey.length){
 		heartGrey.each(function( index ) {
-			this.click();
+			if(check === false){
+				this.click();
+			}
 			liked = 1;
 		});
-	}else{
-		if($( ".glyphsSpriteHeart__filled__24__red_5" ).length){			
-			log('allready liked');			
-		}else{			
-			log('bug, no heart');
-			liked = -1;
-		}
-	}
+	}else{			
+		log('bug, no heart');
+		liked = -1;
+	}	
 	return liked;
 }
 

@@ -17,61 +17,47 @@ var keepFollowers = false;// true : conserver les gens qui nous suivent
 var unfollowSafe = false;// true : ne va pas unfollow si le nombre de followrs trouvé dans la liste n'est pas le meme que celui qui est indiqué dans le profile
 var fuckScroll = true;//dont do scroll at the begining, if the list is allready full
 
-var differential = true;//faire une action toutes les speedAction, même si le script a des lenteurs ou s'il a fait plusieurs actions
+var differential = false;//faire une action toutes les speedAction, même si le script a des lenteurs ou s'il a fait plusieurs actions
 var maxNbScrollToBottom = 180; // ne pas afficher plus de x * 10 user dans abonnements // plus utilisé pour le moment
 var secondBeforeNextScroll = 2000;
 var qtyMissingUsersTolerated = 20;//lors de la récupération de la liste des personnes qui suivent, quantité manquante toléré pour commencer les unfollow en masse
 //var qtyMaxFollowedToKeep = 2000; pour ne pas se manger le ban de trop de followed de charger, limiter la liste à 2000 personnes à garder
 
-var aFollowerToKeep = ['edson.mastreani','tatianaspiridonova','ericparephoto','anya_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
+var aFollowerToKeep = ['edson.mastreani','tatianaspiridonova','ericparephoto','hanna_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
 var aFollowerToKeepFound = [];
 var countUnfollow = 0;
 var countElement = 0;
-var dateLastAction = new Date();
+var dateLastAction = new Date(); //used for differential and restart the script
 var lastQtyFollowedFound;
 var sumScrollHeight = 0;
 var bKeepScroling = true;
+var sReturn = ''; //sting used for knowing what a function return
 
 function unfollow(){
 	log('debut unfollow');
-    var username;
-    $( ".PZuss li" ).each(function( index ) {
-		//log('dans boucle unfollow');
-
-		if(countUnfollow >= maxUnfollow){
-			return false;
-		}
-		if( $(this).find(".L3NKy").text() == 'Abonné(e)'){
-			log('Abonné trouvé à viré');
-			username = $(this).find(".FPmhX").text();
-			log('after username');
-			if($.inArray(username,aFollowerToKeep) != -1){
-				log('user à garder');
-				if($.inArray(username,aFollowerToKeepFound) == -1){//pour ne pas afficher à chaque fois les users que l'on ne doit pas prendre en compte
-					log('Follower to keep :'+username);
-					aFollowerToKeepFound.push(username);
-					log('user ajouté à liste');
-				}
-			}else{
-				countUnfollow++;
-				log('Unfollow N°'+countUnfollow+' : '+username+'');		
-				
-				$(this).find("._8A5w5").click();			
-				
-				sleep(1000).then(() => {
-					confirmUnfollow();		
-					scrollDown();
-					var speedNextAction = getTimeNextAction(differential);					
-					sleep(speedNextAction).then(() => {
-						scrollDown();
-						return unfollow();
-					});
-				});	
-				log('fin boucle car next unfollow');
+	
+	openDivUnfollowUser();
+	if (sReturn == 'open' ){
+		log('in open');
+		sleep(1000).then(() => {
+			confirmUnfollow();		
+			scrollDown();
+			var speedNextAction = getTimeNextAction();					
+			sleep(speedNextAction).then(() => {
+				scrollDown();
+				unfollow();
 				return false;
-			}			
-        }
-    });
+			});
+			return false;
+		});	
+		log('fin boucle car next unfollow');
+		return false;
+	}else if (sReturn == 'stop'){
+		log('limite atteinte');
+	}else{
+		log('sReturn : '+sReturn);
+	}
+
 	log('no more unfollow ?');
 	sleep(240000).then(() => {
 		if((new Date() - dateLastAction) > 180000){
@@ -81,8 +67,39 @@ function unfollow(){
 		}else{
 			log('not stoped : '+(new Date() - dateLastAction)+' ms');
 		}
-	});
-	
+	});	
+}
+
+function openDivUnfollowUser(){
+    var username;
+	sReturn = 'nothing_done';
+    $( ".PZuss li" ).each(function( index ) {
+		//log('dans boucle unfollow');
+
+		if(countUnfollow >= maxUnfollow){
+			sReturn = 'stop';
+			return false;
+		}
+		if( $(this).find(".L3NKy").text() == 'Abonné(e)'){
+			//log('Abonné trouvé à viré');
+			username = $(this).find(".FPmhX").text();
+			if($.inArray(username,aFollowerToKeep) != -1){
+				log('user à garder');
+				if($.inArray(username,aFollowerToKeepFound) == -1){//pour ne pas afficher à chaque fois les users que l'on ne doit pas prendre en compte
+					log('Follower to keep :'+username);
+					aFollowerToKeepFound.push(username);
+					log('user ajouté à liste');
+				}
+			}else{
+				$(this).find("._8A5w5").click();
+				countUnfollow++;
+				log('Unfollow N°'+countUnfollow+' : '+username+'');	
+				sReturn = 'open';	
+				return false;				
+			}			
+        }
+    });
+	return false;
 }
 
 function scrollDown(){
@@ -92,8 +109,7 @@ function scrollDown(){
 		if($( ".PZuss li" ).last().find(".FPmhX").text() == 'mathildemusic'){
 			bKeepScroling = false;
 			log('no more scroll');
-		}		
-		
+		}
 	}
 }
 
@@ -106,7 +122,7 @@ function getSumScrollHeight(){
 	return sumScrollHeight;
 }
 
-function getTimeNextAction (differential = false){
+function getTimeNextAction (){
 	if(differential === true){
 		var speedNextAction = speedAction - (new Date() - dateLastAction);
 		if(speedNextAction < 0){						

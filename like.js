@@ -4,7 +4,7 @@
 
 /**FOLLOW******************************************/
 
-var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
+var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), 110000 erreurs apres 1771 follow en 24h
 var maxActions = 9999;//999
 
 var maxLikesOnAPost = 30;

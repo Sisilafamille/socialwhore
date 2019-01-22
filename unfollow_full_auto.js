@@ -17,7 +17,7 @@ var keepFollowers = false;// true : conserver les gens qui nous suivent
 var unfollowSafe = false;// true : ne va pas unfollow si le nombre de followrs trouvé dans la liste n'est pas le meme que celui qui est indiqué dans le profile
 var fuckScroll = true;//dont do scroll at the begining, if the list is allready full
 
-var differential = false;//faire une action toutes les speedAction, même si le script a des lenteurs ou s'il a fait plusieurs actions
+var differential = true;//faire une action toutes les speedAction, même si le script a des lenteurs ou s'il a fait plusieurs actions
 var maxNbScrollToBottom = 180; // ne pas afficher plus de x * 10 user dans abonnements // plus utilisé pour le moment
 var secondBeforeNextScroll = 2000;
 var qtyMissingUsersTolerated = 20;//lors de la récupération de la liste des personnes qui suivent, quantité manquante toléré pour commencer les unfollow en masse
@@ -30,29 +30,33 @@ var countElement = 0;
 var dateLastAction = new Date();
 var lastQtyFollowedFound;
 var sumScrollHeight = 0;
+var bKeepScroling = true;
 
 function unfollow(){
+	log('debut unfollow');
     var username;
     $( ".PZuss li" ).each(function( index ) {
+		//log('dans boucle unfollow');
 
 		if(countUnfollow >= maxUnfollow){
 			return false;
 		}
 		if( $(this).find(".L3NKy").text() == 'Abonné(e)'){
-	
-			scrollDown();
+			log('Abonné trouvé à viré');
 			username = $(this).find(".FPmhX").text();
-
+			log('after username');
 			if($.inArray(username,aFollowerToKeep) != -1){
+				log('user à garder');
 				if($.inArray(username,aFollowerToKeepFound) == -1){//pour ne pas afficher à chaque fois les users que l'on ne doit pas prendre en compte
 					log('Follower to keep :'+username);
 					aFollowerToKeepFound.push(username);
+					log('user ajouté à liste');
 				}
 			}else{
 				countUnfollow++;
 				log('Unfollow N°'+countUnfollow+' : '+username+'');		
 				
-				$(this).find("._8A5w5").click();
+				$(this).find("._8A5w5").click();			
 				
 				sleep(1000).then(() => {
 					confirmUnfollow();		
@@ -60,18 +64,37 @@ function unfollow(){
 					var speedNextAction = getTimeNextAction(differential);					
 					sleep(speedNextAction).then(() => {
 						scrollDown();
-						unfollow();
+						return unfollow();
 					});
-				});				
+				});	
+				log('fin boucle car next unfollow');
 				return false;
 			}			
         }
     });
-	notif('no more unfollow ?');
+	log('no more unfollow ?');
+	sleep(240000).then(() => {
+		if((new Date() - dateLastAction) > 180000){
+			log('was stoped : '+(new Date() - dateLastAction)+' ms');
+			dateLastAction = new Date();
+			return unfollow();
+		}else{
+			log('not stoped : '+(new Date() - dateLastAction)+' ms');
+		}
+	});
+	
 }
 
 function scrollDown(){
-	$(".isgrP").scrollTop(getSumScrollHeight());
+	if(bKeepScroling === true){
+		$(".isgrP").scrollTop(getSumScrollHeight());
+		log('after scroll down');
+		if($( ".PZuss li" ).last().find(".FPmhX").text() == 'mathildemusic'){
+			bKeepScroling = false;
+			log('no more scroll');
+		}		
+		
+	}
 }
 
 function getSumScrollHeight(){
@@ -95,6 +118,7 @@ function getTimeNextAction (differential = false){
 		dateLastAction = new Date();
 		return speedNextAction;
 	}else{
+		dateLastAction = new Date();
 		return speedAction;
 	}	
 }
@@ -266,7 +290,7 @@ function startUnfollow(){
 			let now = new Date();							
 			log('Unfollowing '+maxUnfollow+' users now: '+now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() );
 			
-			unfollow();
+			return unfollow();
 		});	
 	});	
 }

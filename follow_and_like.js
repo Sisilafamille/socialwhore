@@ -12,9 +12,27 @@
 
 //si pas de chargemnt du cadre suivant : plantage : fermer calque et aller à la fin et click
 //bug: memory leak car grossi exponentiellement 
-//bug: pas de like si zero coeur ?
-//todo: ajax: check follow fail ? juste recup lib lien s'abonner. si toujours s'abonner c'est que probleme, alors meme solution que pour ajax
+
+
+
+
+
+
+
+
+
+
 //todo: ajax : pas follow si plus de X follower
+
+
+
+
+
+
+
+
+
+//todo: ajax: check follow fail ? juste recup lib lien s'abonner. si toujours s'abonner c'est que probleme, alors meme solution que pour ajax
 //todo: ajax: liker x photos de chaques profiles ajouté
 
 //si image n'existe pas, la fonction pour en trouver une autre est pas parfaite, elle ne fonctionne pas si pas présent sur l'ecran parfois.
@@ -24,11 +42,11 @@
 //https://www.instagram.com/web/friendships/365136188/unfollow/
 
 
-var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000
+var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000 qui plante au bout de 1700, voir avantg avec ajax
 var maxActions = 9999;//999
 
-var maxLikesOnAPost = 10000;
-var maxViewsOnAPost = 10000;
+var maxLikesOnAPost = 50;
+var maxViewsOnAPost = 50;
 var defaultMaxFailFolow = 3;
 var keepLogs = true;
 var minSpeedNextAction = 15000; //5 et < : bloque au bout de x next

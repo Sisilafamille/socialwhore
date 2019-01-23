@@ -3,34 +3,11 @@
 
 /** FOLLOW & LIKE DUM ******************************************/
 /** navige d'images en images et like + follow si en dessous d'une limite de like/vues **/
-
-//ne pas follow si follow deja !!!!!
-
 //modifier mode de fonctionement : passer de photos en photo en mode mignature, check nombre coeur ou ajax nb follower.
 	//si pas bon : next, sinon click + follow. si fin de page, scroll, puis attente, puis reprise là ou on en était, avec ajout ID dans photo si pas capable de continuer
 
-
 //si pas de chargemnt du cadre suivant : plantage : fermer calque et aller à la fin et click
 //bug: memory leak car grossi exponentiellement 
-
-
-
-
-
-
-
-
-
-
-//todo: ajax : pas follow si plus de X follower
-
-
-
-
-
-
-
-
 
 //todo: ajax: check follow fail ? juste recup lib lien s'abonner. si toujours s'abonner c'est que probleme, alors meme solution que pour ajax
 //todo: ajax: liker x photos de chaques profiles ajouté
@@ -45,11 +22,13 @@
 var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000 qui plante au bout de 1700, voir avantg avec ajax
 var maxActions = 9999;//999
 
-var maxLikesOnAPost = 50;
-var maxViewsOnAPost = 50;
+var displayLog = true;//display extra log in the console
+var maxLikesOnAPost = 5000;
+var maxViewsOnAPost = 5000;
 var defaultMaxFailFolow = 3;
 var keepLogs = true;
 var minSpeedNextAction = 15000; //5 et < : bloque au bout de x next
+var nbMaxFollowerAUserCanHave = 5000;//if the user have more than xxx followers, we dont follow then
 
 var MinTimeTryAgain = 600000;
 var MaxTimeTryAgain = 18000000;//5h
@@ -66,17 +45,19 @@ function sleep (time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-function log(text){
-	let now = new Date();	
-	var second = now.getSeconds();
-	if(second < 10){
-		second = '0'+second;
+function log(text,allwaysDisplay = true){
+	if(allwaysDisplay == true || displayLog == true){
+		let now = new Date();	
+		var second = now.getSeconds();
+		if(second < 10){
+			second = '0'+second;
+		}
+		var minute = now.getMinutes();
+		if(minute < 10){
+			minute = '0'+minute;
+		}
+		console.log(now.getHours() + "H" + minute + " " +second+'s: '+text);
 	}
-	var minute = now.getMinutes();
-	if(minute < 10){
-		minute = '0'+minute;
-	}
-	console.log(now.getHours() + "H" + minute + " " +second+'s: '+text);
 }
 
 function notif(str){
@@ -361,20 +342,26 @@ function getIsFollowingUsAjax(){
 	request.send(); // there will be a 'pause' here until the response to come.
 
 	if (request.status === 404) {
-		console.log("The page you are trying to reach is not available.");	
+		log("The page you are trying to reach is not available.");	
 		isFollowingUs = 'error';
 	}else{
 		
 		//console.log(request);
 		//console.log(request.response);
 		var obj = JSON.parse(request.response); 
-				
-		if(obj.graphql.user.follows_viewer){
+		//console.log(obj.graphql.user.edge_followed_by.count);		
+		//console.log(nbMaxFollowerAUserCanHave);		
+
+		if(obj.graphql.user.edge_followed_by.count > nbMaxFollowerAUserCanHave){
+			isFollowingUs = 'too much';
+			log('Too much followers: '+nameUser+' - '+obj.graphql.user.edge_followed_by.count+' followers ');
+		}else if(obj.graphql.user.follows_viewer){
 			isFollowingUs = 'yes';
-			console.log('Allready following us: '+nameUser);
-		}else{
-			console.log('not following us: '+nameUser);
+			log('Allready following us: '+nameUser);
+		}else {
+			log('not following us: '+nameUser);
 		}
+		
 		//console.log(request.responseText);
 		//var newDoc = document.open("text/html", "replace");
 		//newDoc.write(request.responseText);

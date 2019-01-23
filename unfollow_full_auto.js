@@ -13,6 +13,7 @@
 var speedAction = 52000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 54k,56k pas de probleme
 var maxUnfollow = 99999;//max - 1000 par jours ? 1000 ? 2000 ?
 
+var displayLog = true;//display extra log in the console
 var keepFollowers = false;// true : conserver les gens qui nous suivent
 var unfollowSafe = false;// true : ne va pas unfollow si le nombre de followrs trouvé dans la liste n'est pas le meme que celui qui est indiqué dans le profile
 var fuckScroll = true;//dont do scroll at the begining, if the list is allready full
@@ -34,30 +35,30 @@ var bKeepScroling = true;
 var sReturn = ''; //sting used for knowing what a function return
 
 function unfollow(){
-	log('debut unfollow');
+	log('debut unfollow',false);
 	
 	openDivUnfollowUser();
 	if (sReturn == 'open' ){
-		log('in open');
+		log('in open',false);
 		sleep(1000).then(() => {
 			confirmUnfollow();		
 			scrollDown();
 			var speedNextAction = getTimeNextAction();					
 			sleep(speedNextAction).then(() => {
-				scrollDown();
+				//scrollDown();
 				unfollow();
 				return false;
 			});
 			return false;
 		});	
-		log('fin boucle car next unfollow');
+		log('fin boucle car next unfollow',false);
 		return false;
 	}else if (sReturn == 'stop'){
 		log('limite atteinte');
 	}else{
 		log('sReturn : '+sReturn);
 	}
-
+	sReturn = '';
 	log('no more unfollow ?');
 	sleep(240000).then(() => {
 		if((new Date() - dateLastAction) > 180000){
@@ -84,7 +85,7 @@ function openDivUnfollowUser(){
 			//log('Abonné trouvé à viré');
 			username = $(this).find(".FPmhX").text();
 			if($.inArray(username,aFollowerToKeep) != -1){
-				log('user à garder');
+				log('user à garder '+username,false);
 				if($.inArray(username,aFollowerToKeepFound) == -1){//pour ne pas afficher à chaque fois les users que l'on ne doit pas prendre en compte
 					log('Follower to keep :'+username);
 					aFollowerToKeepFound.push(username);
@@ -105,8 +106,9 @@ function openDivUnfollowUser(){
 function scrollDown(){
 	if(bKeepScroling === true){
 		$(".isgrP").scrollTop(getSumScrollHeight());
-		log('after scroll down');
-		if($( ".PZuss li" ).last().find(".FPmhX").text() == 'mathildemusic'){
+		log('after scroll down',false);
+		var lastFollowed = $( ".PZuss li" ).last().find(".FPmhX").text();
+		if(lastFollowed == 'mathildemusic' || lastFollowed == 'giuliano_alexander'){
 			bKeepScroling = false;
 			log('no more scroll');
 		}
@@ -129,7 +131,7 @@ function getTimeNextAction (){
 			speedNextAction = 200;
 			log('temps d attente plus long que entre deux actions : '+((new Date() - dateLastAction))/1000)+'s > '+(speedAction/1000)+'s';
 		}else{
-			log('speedNextAction : '+speedNextAction);
+			log('speedNextAction : '+speedNextAction,false);
 		}
 		dateLastAction = new Date();
 		return speedNextAction;
@@ -149,17 +151,19 @@ function sleep (time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-function log(text){
-	let now = new Date();	
-	var second = now.getSeconds();
-	if(second < 10){
-		second = '0'+second;
+function log(text,allwaysDisplay = true){
+	if(allwaysDisplay == true || displayLog == true){
+		let now = new Date();	
+		var second = now.getSeconds();
+		if(second < 10){
+			second = '0'+second;
+		}
+		var minute = now.getMinutes();
+		if(minute < 10){
+			minute = '0'+minute;
+		}
+		console.log(now.getHours() + "H" + minute + " " +second+'s: '+text);
 	}
-	var minute = now.getMinutes();
-	if(minute < 10){
-		minute = '0'+minute;
-	}
-	console.log(now.getHours() + "H" + minute + " " +second+'s: '+text);
 }
 
 function notif(str){

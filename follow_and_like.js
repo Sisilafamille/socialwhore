@@ -18,17 +18,20 @@
 //https://www.instagram.com/web/friendships/365136188/follow/
 //https://www.instagram.com/web/friendships/365136188/unfollow/
 
+//cliquer premiere image, si pas ok, fermer, delete et next?
+// pour le jump, effacer xxx images ?
+//delete premier block ?
 
 var speedAction = 110000;//36000 pour ne pas depasser 100 actions par heures, 200 par heures ? max 1000 par jour + pause 24h. 1000 likes max aussi par jours. block avec 75000, 90000, 100000 ( 1200 en 22h), test 110000 qui plante au bout de 1700, voir avantg avec ajax
-var maxActions = 9999;//999
+var maxActions = 9999;//9999
 
 var displayLog = true;//display extra log in the console
-var maxLikesOnAPost = 5000;
-var maxViewsOnAPost = 5000;
+var maxLikesOnAPost = 30;
+var maxViewsOnAPost = 30;
 var defaultMaxFailFolow = 3;
 var keepLogs = true;
 var minSpeedNextAction = 15000; //5 et < : bloque au bout de x next
-var nbMaxFollowerAUserCanHave = 5000;//if the user have more than xxx followers, we dont follow then
+var nbMaxFollowerAUserCanHave = 1000;//if the user have more than xxx followers, we dont follow then
 
 var MinTimeTryAgain = 600000;
 var MaxTimeTryAgain = 18000000;//5h
@@ -230,10 +233,10 @@ function openPost(){
 				window.scrollTo(0,document.body.scrollHeight);				
 				sleep(3000).then(() => {
 					//ouvrir la derniere image de la liste
-					var picture = $( ".eLAPa" );
-					if(picture.length){
+					var pictures = $( ".eLAPa" );
+					if(pictures.length){
 						log('tentative de clic sur derniere image');				
-						picture.last().click();
+						pictures.last().click();
 						sleep(2000).then(() => {				
 							followAndLike();				
 							log('ouvrir la derniere image de la liste : good !!');
@@ -249,10 +252,11 @@ function openPost(){
 		}	 
 	}else{
 		$("html, body").animate({ scrollTop: $(document).height() }, 100);
-		var picture = $( ".eLAPa" );
-		if(picture.length){
-			log('Tentative de clic sur image');				
-			picture.last().click();		
+	
+		if($( ".eLAPa" ).length){
+			log('Tentative de clic sur la derniere image');				
+			$( ".eLAPa" ).last().click();	
+			$( ".FFVAD" ).remove();//retire toutes les images, bonne idée pour la ram ?
 			return true;		
 		}else{		
 			log('Aucune action possible, fin du programme');	
@@ -426,4 +430,5 @@ function getQuantityview(){
 if( Notification.permission != 'granted'){
 	Notification.requestPermission();
 }
+$( ".EZdmt" ).remove();
 followAndLike();

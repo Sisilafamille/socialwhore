@@ -6,7 +6,7 @@
 //todo : check en ajax pour savoir si est bien unfollow, pause de 5 minutes, 15 minutes, 30, 1h, 2h, 5h, 10h ... //https://www.instagram.com/web/friendships/albertastreetart/unfollow/
 //			sinon check en ajax x secondes apres avoir clquer pour connaitre statut 
 
-var speedAction = 52000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 54k,56k pas de probleme//5200 a déja eu des blocks, apres 4687 
+var speedAction = 53000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 54k,56k pas de probleme//5200 a déja eu des blocks, apres 4687 et 4723 
 var maxUnfollow = 99999;//max - 1000 par jours ? 1000 ? 2000 ?
 
 var displayLog = true;//display extra log in the console
@@ -18,9 +18,8 @@ var differential = false;//faire une action toutes les speedAction, même si le 
 var maxNbScrollToBottom = 180; // ne pas afficher plus de x * 10 user dans abonnements // plus utilisé pour le moment
 var secondBeforeNextScroll = 2000;
 var qtyMissingUsersTolerated = 20;//lors de la récupération de la liste des personnes qui suivent, quantité manquante toléré pour commencer les unfollow en masse
-//var qtyMaxFollowedToKeep = 2000; pour ne pas se manger le ban de trop de followed de charger, limiter la liste à 2000 personnes à garder
 
-var aFollowerToKeep = ['edson.mastreani','tatianaspiridonova','ericparephoto','hanna_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
+var aFollowerToKeep = ['journaljds_portraits','edson.mastreani','tatianaspiridonova','ericparephoto','hanna_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic','_etchou','eliza_decomte'];
 var aFollowerToKeepFound = [];
 var countUnfollow = 0;
 var countElement = 0;
@@ -29,35 +28,46 @@ var lastQtyFollowedFound;
 var sumScrollHeight = 0;
 var bKeepScroling = true;
 var sReturn = ''; //sting used for knowing what a function return
+var waintingTimeIfUnauthorized = 0;//time to wait before continuing to unfollow if it was not possible ( error 400)
+var currentUser = '';//user that was unfollow
+var qtyFailFollow = 0;//qty follow fail
 
 function unfollow(){
 	log('debut unfollow',false);
 	
-	openDivUnfollowUser();
-	if (sReturn == 'open' ){
-		log('in open',false);
-		sleep(1000).then(() => {
-			log('before confirmUnfollow',false);
-			confirmUnfollow();		
-			scrollDown();
-			var speedNextAction = getTimeNextAction();					
-			sleep(speedNextAction).then(() => {
-				//scrollDown();
-				unfollow();
+	checkUnfollowSucces();
+	if(qtyFailFollow < 3){
+		openDivUnfollowUser();
+		if (sReturn == 'open' ){
+			log('in open',false);
+			sleep(1000).then(() => {
+				log('before confirmUnfollow',false);
+				confirmUnfollow();		
+				scrollDown();
+				var speedNextAction = getTimeNextAction();					
+				sleep(speedNextAction).then(() => {
+					//scrollDown();
+					unfollow();
+					return false;
+				});
 				return false;
-			});
+			});	
+			log('fin boucle car next unfollow',false);
 			return false;
-		});	
-		log('fin boucle car next unfollow',false);
-		return false;
-	}else if (sReturn == 'stop'){
-		log('limite atteinte');
+		}else if (sReturn == 'stop'){
+			log('limite atteinte');
+		}else{
+			log('sReturn : '+sReturn);
+		}
+		sReturn = '';
+		log('no more unfollow ?');
 	}else{
-		log('sReturn : '+sReturn);
+		if(waintingTimeIfUnauthorized < 360000000 ){
+			waintingTimeIfUnauthorized += (3600000*2 + waintingTimeIfUnauthorized);
+		}
+		log('Petite pause de '+(waintingTimeIfUnauthorized/1000/60)+'minutes');
 	}
-	sReturn = '';
-	log('no more unfollow ?');
-	sleep(speedAction + 5000).then(() => {
+	sleep(speedAction + 5000 + waintingTimeIfUnauthorized).then(() => {
 		if((new Date() - dateLastAction) > (speedAction+3000)){
 			log('was stoped : '+(new Date() - dateLastAction)+' ms');
 			dateLastAction = new Date();
@@ -80,11 +90,14 @@ function openDivUnfollowUser(){
 		}
 		
 		username = $(this).find(".FPmhX").text();
+		
+		
+		
 		if( $(this).find(".L3NKy").text() == 'Abonné(e)'){
 			//log('Abonné trouvé à viré');
 			
 			if($.inArray(username,aFollowerToKeep) != -1){
-				log('user à garder '+username,false);
+				//log('user à garder '+username,false);
 				if($.inArray(username,aFollowerToKeepFound) == -1){//pour ne pas afficher à chaque fois les users que l'on ne doit pas prendre en compte
 					log('Follower to keep :'+username);
 					aFollowerToKeepFound.push(username);
@@ -95,11 +108,11 @@ function openDivUnfollowUser(){
 				countUnfollow++;
 				log('Unfollow N°'+countUnfollow+' : '+username+'');	
 				sReturn = 'open';	
+				currentUser = username;
 				return false;				
 			}			
         }else{
-			
-			
+						
 			$(this).remove();
 			log('remove '+username+'. List users size :'+$( ".PZuss li" ).length);
 			//console.log($( ".PZuss li" ));
@@ -311,6 +324,37 @@ function main(){
 	}else{
 		log(' bug, pas la bonne page ? il faut aller sur la page de profile.');
 	}
+}
+
+function checkUnfollowSucces(){
+	if(currentUser != ''){
+		var bUnfollowSucces = false;
+		var nameUser = currentUser;
+		var nextPageUrl = 'https://www.instagram.com/'+nameUser+'/?__a=1';
+		var request;
+		request = new XMLHttpRequest();
+		request.open('GET', nextPageUrl, false);
+		request.send(); // there will be a 'pause' here until the response to come.
+
+		if (request.status === 404) {
+			log("The page you are trying to reach is not available.");	
+			bUnfollowSucces = 'error';
+		}else{
+			var obj = JSON.parse(request.response); 
+			 if(obj.graphql.user.follows_viewer){
+				
+				log('Error : Still following us: '+nameUser);
+				qtyFailFollow ++;
+			}else {
+				log('Good : not following us: '+nameUser);
+				bUnfollowSucces = true;
+				qtyFailFollow = 0;
+				waintingTimeIfUnauthorized = 0;
+			}
+		}
+		currentUser = '';
+	}
+	return bUnfollowSucces;
 }
 
 function startUnfollow(){

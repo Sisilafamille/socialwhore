@@ -256,7 +256,7 @@ function openPost(){
 		if($( ".eLAPa" ).length){
 			log('Tentative de clic sur la derniere image');				
 			$( ".eLAPa" ).last().click();	
-			$( ".FFVAD" ).remove();//retire toutes les images, bonne idée pour la ram ?
+			//$( ".FFVAD" ).remove();//retire toutes les images, bonne idée pour la ram ?
 			return true;		
 		}else{		
 			log('Aucune action possible, fin du programme');	
@@ -430,5 +430,5 @@ function getQuantityview(){
 if( Notification.permission != 'granted'){
 	Notification.requestPermission();
 }
-$( ".EZdmt" ).remove();
+$( ".EZdmt" ).remove();//remove firsts pictures
 followAndLike();

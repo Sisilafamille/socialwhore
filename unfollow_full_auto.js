@@ -6,7 +6,7 @@
 //todo : check en ajax pour savoir si est bien unfollow, pause de 5 minutes, 15 minutes, 30, 1h, 2h, 5h, 10h ... //https://www.instagram.com/web/friendships/albertastreetart/unfollow/
 //			sinon check en ajax x secondes apres avoir clquer pour connaitre statut 
 
-var speedAction = 53000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 54k,56k pas de probleme//5200 a déja eu des blocks, apres 4687 et 4723 
+var speedAction = 58000;//65000 : no probleme/ 40000ms fonctionne pour 1000 users mais avec des 403 toutes les 18 fiches/ 46000 ok pour 3500 en 2j et demi/58000 pas de bug pour plus de 2000 unfollow, 54k,56k pas de probleme//5200 a déja eu des blocks, apres 4687 et 4723 , 53 idem
 var maxUnfollow = 99999;//max - 1000 par jours ? 1000 ? 2000 ?
 
 var displayLog = true;//display extra log in the console
@@ -35,8 +35,8 @@ var qtyFailFollow = 0;//qty follow fail
 function unfollow(){
 	log('debut unfollow',false);
 	
-	checkUnfollowSucces();
-	if(qtyFailFollow < 3){
+	checkUnfollowSucces(currentUser);
+	if(qtyFailFollow < 2){
 		openDivUnfollowUser();
 		if (sReturn == 'open' ){
 			log('in open',false);
@@ -62,8 +62,9 @@ function unfollow(){
 		sReturn = '';
 		log('no more unfollow ?');
 	}else{
-		if(waintingTimeIfUnauthorized < 360000000 ){
-			waintingTimeIfUnauthorized += (3600000*2 + waintingTimeIfUnauthorized);
+		qtyFailFollow--;
+		if(waintingTimeIfUnauthorized <= (60*60*10*1000) ){//10h
+			waintingTimeIfUnauthorized += ((60*60*2*1000) + waintingTimeIfUnauthorized);//+2h
 		}
 		log('Petite pause de '+(waintingTimeIfUnauthorized/1000/60)+'minutes');
 	}
@@ -90,8 +91,6 @@ function openDivUnfollowUser(){
 		}
 		
 		username = $(this).find(".FPmhX").text();
-		
-		
 		
 		if( $(this).find(".L3NKy").text() == 'Abonné(e)'){
 			//log('Abonné trouvé à viré');
@@ -326,10 +325,9 @@ function main(){
 	}
 }
 
-function checkUnfollowSucces(){
-	if(currentUser != ''){
+function checkUnfollowSucces(nameUser){
+	if(nameUser != ''){
 		var bUnfollowSucces = false;
-		var nameUser = currentUser;
 		var nextPageUrl = 'https://www.instagram.com/'+nameUser+'/?__a=1';
 		var request;
 		request = new XMLHttpRequest();
@@ -341,8 +339,7 @@ function checkUnfollowSucces(){
 			bUnfollowSucces = 'error';
 		}else{
 			var obj = JSON.parse(request.response); 
-			 if(obj.graphql.user.follows_viewer){
-				
+			 if(obj.graphql.user.followed_by_viewer){				
 				log('Error : Still following us: '+nameUser);
 				qtyFailFollow ++;
 			}else {

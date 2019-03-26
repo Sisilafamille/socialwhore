@@ -29,8 +29,9 @@ var bKeepScroling = true;//peut etre à virer
 var qtyFailFollow = 0;
 var currentUser = '';//user that was followed
 var waintingTimeIfUnauthorized = 0;//time to wait before continuing to followFollowers if it was not possible ( error 400)
-var nbMaxFollowerAUserCanHave = 400;//if the user have more than xxx followers, we dont follow then //avec 1000 : 50 folowers par jours
+var nbMaxFollowerAUserCanHave = 400;//if the user have more than xxx followers, we dont follow then //avec 400 : 70 folowers par jours
 var dateLastAction = new Date();
+var pauseReload = false; // used so stop reload when follow not possible
 
 function followFollowers(){
 	var username;
@@ -56,7 +57,7 @@ function followFollowers(){
 					$(this).remove();
 					scrollDown();
 					var speedNextAction = getTimeNextAction();
-					sleep(speedAction).then(() => {
+					sleep(speedNextAction).then(() => {
 						return followFollowers();
 					});
 					return false;
@@ -75,21 +76,28 @@ function followFollowers(){
 			followFollowers();
 		}*/
 	}else{
-		qtyFailFollow--;
+		if(pauseReload == true){//si true = dans boucle de reload			
+			qtyFailFollow--;
+			pauseReload = false;
+		}else{
+			pauseReload = true;
+		}
 		if(waintingTimeIfUnauthorized <= (60*60*10*1000) ){//10h
 			waintingTimeIfUnauthorized += ((60*60*2*1000) + waintingTimeIfUnauthorized);//+2h
 		}
 		log('Petite pause de '+(waintingTimeIfUnauthorized/1000/60)+'minutes');
 	}
-	sleep(speedAction + 5000 + waintingTimeIfUnauthorized).then(() => {
-		if((new Date() - dateLastAction) > (speedAction+3000)){
-			log('was stoped : '+(new Date() - dateLastAction)+' ms');
-			dateLastAction = new Date();
-			return followFollowers();
-		}else{
-			log('not stoped : '+(new Date() - dateLastAction)+' ms');
-		}
-	});
+	if(pauseReload == false){
+		sleep(speedAction + 5000 + waintingTimeIfUnauthorized).then(() => {
+			if((new Date() - dateLastAction) > (speedAction+3000)){
+				log('was stoped : '+(new Date() - dateLastAction)+' ms');
+				dateLastAction = new Date();
+				return followFollowers();
+			}else{
+				log('not stoped : '+(new Date() - dateLastAction)+' ms');
+			}
+		});
+	}
 }
 
 function checkFollowSucces(nameUser){

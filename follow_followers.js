@@ -12,16 +12,12 @@
 + check ajax/ou juste bouton si follow a fonctionner
 + supprimer ligne
 - si nombre user dans la liste == 1 , alors scroll
+
+déja folow : tymondelaat
 */
-/* worked :
-var speedAction = 15000;
-var maxFollow = 400;// de 1600 à 2000
-mais bloqué plus tard avec le même rhytme : plus de 12h sans pouvoir follow pour l'instant
-**/
-var speedAction = 75000;// en milli secondes : default normalment 86000//86400 ok mais pas assez rapide en comparaison de unfollow
+var speedAction = 76000;// en milli secondes : default normalment 86000//86400 ok mais pas assez rapide en comparaison de unfollow//75000 plante apres 1600 follow//
 var maxFollow = 10000;// max 1000/24h ???
 var differential = false;//faire une action toutes les speedAction, même si le script a des lenteurs ou s'il a fait plusieurs actions
-
 
 var countFollow = 0;
 var sumScrollHeight = 0;
@@ -189,9 +185,9 @@ function getIsFollowingUsAjax(nameUser){
 	return isFollowingUs;
 }
 
-function scrollDown(){
+function scrollDown(force = false){
 	if(bKeepScroling === true){
-		if($( ".PZuss li" ).length < 10){
+		if($( ".PZuss li" ).length < 10 || force == true){
 			$(".isgrP").scrollTop(getSumScrollHeight());
 			log('after scroll down',false);
 			var lastFollowed = $( ".PZuss li" ).last().find(".FPmhX").text();
@@ -208,9 +204,9 @@ function scrollDown(){
 
 function getSumScrollHeight(){
 	if(sumScrollHeight < 1000){
-		sumScrollHeight += 200;
+		sumScrollHeight += 150;
 	}else{
-		sumScrollHeight += 600;
+		sumScrollHeight += 200;
 	}
 	return sumScrollHeight;
 }
@@ -225,7 +221,14 @@ function main(){
 	if($(".g47SY").length && $(".g47SY").length == 3){// vérif si sur la bonne page
 		openListUser(2);
 		sleep(3000).then(() => {
-			followFollowers();
+			scrollDown(true);
+			sleep(3000).then(() => {
+				scrollDown(true);
+				sleep(3000).then(() => {
+					scrollDown(true);
+					followFollowers();
+				});
+			});
 		});
 	}else{
 		log(' bug, pas la bonne page ? il faut aller sur la page de profile.');

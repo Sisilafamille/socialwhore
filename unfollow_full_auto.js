@@ -25,7 +25,7 @@ var maxNbScrollToBottom = 180; // ne pas afficher plus de x * 10 user dans abonn
 var secondBeforeNextScroll = 2000;
 var qtyMissingUsersTolerated = 20;//lors de la récupération de la liste des personnes qui suivent, quantité manquante toléré pour commencer les unfollow en masse
 
-var aFollowerToKeep = ['baptiste_bssmrt','trumetb','2niroyal','dominique_dasse','eyesofvic','sixtinelegrand','lepictureshow','journaljds_portraits','edson.mastreani','tatianaspiridonova','ericparephoto','hanna_panchenko','mirellantoun','portraits_today','journaljds','shanivarner','falythomas','anaisjst','fillyx_','quentin_bgn3','anso_fresh','festivallabelvalette','jeanne_toinon','brandonwoelfel','giuliano_alexander','je.prends.des.trucs.en.photo','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','k.e.a________','noa_tenne','lanadanoesnada','_ulie_','marketilla','ifeelgood63','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','myspina','luthomasly','muniquehcavalcanti','gpandim','maridjeine','mathildemusic'];
+var aFollowerToKeep = ['baptiste_bssmrt','lepictureshow','journaljds_portraits','edson.mastreani','hanna_panchenko','journaljds','falythomas','quentin_bgn3','anso_fresh','festivallabelvalette','giuliano_alexander','inaerin','krifrx','susserwein','ila_keys','juliiedesousa','adriane_valente','lanadanoesnada','_ulie_','lynyem','alexandergiuliano','photographyforyourmind','jgjaw','miliniza','luthomasly','gpandim','maridjeine','mathildemusic'];
 var aFollowerToKeepFound = [];
 var countUnfollow = 0;
 var countElement = 0;

@@ -25,7 +25,8 @@ var bKeepScroling = true;//peut etre à virer
 var qtyFailFollow = 0;
 var currentUser = '';//user that was followed
 var waintingTimeIfUnauthorized = 0;//time to wait before continuing to followFollowers if it was not possible ( error 400)
-var nbMaxFollowerAUserCanHave = 400;//if the user have more than xxx followers, we dont follow then //avec 400 : 70 folowers par jours
+var nbMaxFollowerAUserCanHave = 3000;//if the user have more than xxx followers, we dont follow then //avec 400 : 70 folowers par jours
+var nbMaxPeopleAUserCanFollow = 750;//if the user is following more than xxx peoples, we dont follow then because they will never like/comment our publications
 var dateLastAction = new Date();
 var pauseReload = false; // used so stop reload when follow not possible
 
@@ -105,8 +106,11 @@ function checkFollowSucces(nameUser){
 		request.open('GET', nextPageUrl, false);
 		request.send(); // there will be a 'pause' here until the response to come.
 
-		if (request.status === 404 || request.status === 500) {
-			log("The page you are trying to reach is not available.");
+		//console.log('request status '+request.status);
+
+		//if (request.status === 404 || request.status === 500 || request.status === 502 || request.status === 503) {
+		if (request.status !== 200 ) {
+			log("The page you are trying to reach is not available. Error "+request.status);	
 			bFollowSucces = 'error';
 		}else{
 			var obj = JSON.parse(request.response);
@@ -156,8 +160,9 @@ function getIsFollowingUsAjax(nameUser){
 	request.open('GET', nextPageUrl, false);
 	request.send(); // there will be a 'pause' here until the response to come.
 
-	if (request.status === 404 || request.status === 500 ) {
-		log("The page you are trying to reach is not available.");
+	//if (request.status === 404 || request.status === 500 || request.status === 502 || request.status === 503) {
+	if (request.status !== 200 ) {
+		log("The page you are trying to reach is not available. Error "+request.status);
 		isFollowingUs = 'error';
 	}else{
 
@@ -166,13 +171,16 @@ function getIsFollowingUsAjax(nameUser){
 		var obj = JSON.parse(request.response);
 		//console.log(obj.graphql.user.edge_followed_by.count);
 		//console.log(nbMaxFollowerAUserCanHave);
-
-		if(obj.graphql.user.edge_followed_by.count > nbMaxFollowerAUserCanHave){
-			isFollowingUs = 'too much';
-			log('Too much followers: '+nameUser+' - '+obj.graphql.user.edge_followed_by.count+' followers ');
-		}else if(obj.graphql.user.follows_viewer){
+		
+		if(obj.graphql.user.follows_viewer){
 			isFollowingUs = 'yes';
 			log('Allready following us: '+nameUser);
+		}else if(obj.graphql.user.edge_followed_by.count > nbMaxFollowerAUserCanHave){
+			isFollowingUs = 'too much';
+			log('Too much followers: '+nameUser+' - '+obj.graphql.user.edge_followed_by.count+' followers ');
+		}else  if(obj.graphql.user.edge_follow.count > nbMaxPeopleAUserCanFollow){
+			isFollowingUs = 'too much';
+			log('Pute à follow: '+nameUser+' - '+obj.graphql.user.edge_followed_by.count+' pages suivies ');			
 		}else {
 			log('not following us: '+nameUser);
 		}
